@@ -1,8 +1,12 @@
 const { EventEmitter } = require('events')
+const ethUtil = require('ethereumjs-util')
+const Transaction = require('ethereumjs-tx')
 const HDKey = require('hdkey')
 const ProkeyDevice = require('@prokey-io/webcore')
 
-const hdPathString = `m/44'/60'/0'/0`
+const hdPathString = `m/44'/60'/0'/0`;
+const keyringType = 'Prokey Hardware';
+const pathBase = 'm';
 
 class ProkeyKeyring extends EventEmitter {
     constructor(opts = {}) {
@@ -87,8 +91,8 @@ class ProkeyKeyring extends EventEmitter {
                         }
                     })
                 }
-                else 
-                    reject();                
+                else
+                    reject();
             }).catch((e) => {
                 reject(e);
             });
@@ -115,5 +119,91 @@ class ProkeyKeyring extends EventEmitter {
             });
         });
     }
-    
+
+    setAccountToUnlock(index) {
+        this.unlockedAccount = parseInt(index, 10)
+    }
+
+    addAccounts(n = 1) {
+        return new Promise((resolve, reject) => {
+            this.unlock()
+                .then((_) => {
+                    const from = this.unlockedAccount
+                    const to = from + n
+
+                    for (let i = from; i < to; i++) {
+                        const address = this._addressFromIndex(pathBase, i)
+                        if (!this.accounts.includes(address)) {
+                            this.accounts.push(address)
+                        }
+                        this.page = 0
+                    }
+                    resolve(this.accounts)
+                })
+                .catch((e) => {
+                    reject(e)
+                })
+        })
+    }
+
+    getFirstPage() {
+        this.page = 0
+        return this.__getPage(1)
+    }
+
+    getNextPage() {
+        return this.__getPage(1)
+    }
+
+    getPreviousPage() {
+        return this.__getPage(-1)
+    }
+
+    __getPage(increment) {
+        this.page += increment
+
+        if (this.page <= 0) {
+            this.page = 1
+        }
+
+        return new Promise((resolve, reject) => {
+            this.unlock()
+                .then((_) => {
+
+                    const from = (this.page - 1) * this.perPage
+                    const to = from + this.perPage
+
+                    const accounts = []
+
+                    for (let i = from; i < to; i++) {
+                        const address = this._addressFromIndex(pathBase, i)
+                        accounts.push({
+                            address,
+                            balance: null,
+                            index: i,
+                        })
+                        this.paths[ethUtil.toChecksumAddress(address)] = i
+
+                    }
+                    resolve(accounts)
+                })
+                .catch((e) => {
+                    reject(e)
+                })
+        })
+    }
+
+    getAccounts() {
+        return Promise.resolve(this.accounts.slice())
+    }
+
+    removeAccount(address) {
+        if (!this.accounts.map((a) => a.toLowerCase()).includes(address.toLowerCase())) {
+            throw new Error(`Address ${address} not found in this keyring`)
+        }
+        this.accounts = this.accounts.filter((a) => a.toLowerCase() !== address.toLowerCase())
+    }
 }
+
+ProkeyKeyring.type = keyringType;
+module.exports = ProkeyKeyring;

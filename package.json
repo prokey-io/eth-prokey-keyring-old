@@ -26,6 +26,8 @@
   "homepage": "https://github.com/prokey-io/eth-prokey-keyring#readme",
   "dependencies": {
     "@prokey-io/webcore": "^0.1.10",
-    "hdkey": "0.8.0"
+    "hdkey": "0.8.0",
+    "ethereumjs-util": "^5.1.5",
+    "ethereumjs-tx": "^1.3.4"
   }
 }
