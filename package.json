@@ -1,0 +1,26 @@
+{
+  "name": "@prokey-io/eth-prokey-keyring",
+  "version": "0.1.0",
+  "description": "A MetaMask compatible keyring, for prokey hardware wallets",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prokey-io/eth-prokey-keyring.git"
+  },
+  "keywords": [
+    "prokey",
+    "metamask",
+    "hdwallet",
+    "hardwarewallet",
+    "eth"
+  ],
+  "author": "prokey.io",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/prokey-io/eth-prokey-keyring/issues"
+  },
+  "homepage": "https://github.com/prokey-io/eth-prokey-keyring#readme"
+}
