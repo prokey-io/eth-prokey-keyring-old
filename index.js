@@ -203,6 +203,46 @@ class ProkeyKeyring extends EventEmitter {
         }
         this.accounts = this.accounts.filter((a) => a.toLowerCase() !== address.toLowerCase())
     }
+
+    // tx is an instance of the ethereumjs-transaction class.
+    signTransaction(address, tx) {
+        return new Promise((resolve, reject) => {
+            this.unlock()
+                .then((status) => {
+                    this.ethDevice.SignTransaction(
+                        this.device,
+                        {
+                            address_n: this._pathFromAddress(address),
+                            to: this._normalize(tx.to),
+                            value: this._normalize(tx.value),
+                            gasPrice: this._normalize(tx.gasPrice),
+                            gasLimit: this._normalize(tx.gasLimit),
+                            nonce: this._normalize(tx.nonce),
+                            data: this._normalize(tx.data),
+                            chainId: tx._chainId,
+                        }).then((response) => {
+                            tx.v = response.v
+                            tx.r = response.r
+                            tx.s = response.s
+
+                            const signedTx = new Transaction(tx)
+
+                            const addressSignedWith = ethUtil.toChecksumAddress(`0x${signedTx.from.toString('hex')}`)
+                            const correctAddress = ethUtil.toChecksumAddress(address)
+                            if (addressSignedWith !== correctAddress) {
+                                reject(new Error('signature doesnt match the right address'))
+                            }
+
+                            resolve(signedTx)
+                        }).catch((e) => {
+                            reject(new Error((e && e.toString()) || 'Unknown error'))
+                        })
+
+                }).catch((e) => {
+                    reject(new Error((e && e.toString()) || 'Unknown error'))
+                })
+        })
+    }
 }
 
 ProkeyKeyring.type = keyringType;
