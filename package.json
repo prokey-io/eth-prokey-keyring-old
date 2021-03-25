@@ -15,12 +15,17 @@
     "metamask",
     "hdwallet",
     "hardwarewallet",
-    "eth"
+    "ethereum",
+    "keyring"
   ],
   "author": "prokey.io",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/prokey-io/eth-prokey-keyring/issues"
   },
-  "homepage": "https://github.com/prokey-io/eth-prokey-keyring#readme"
+  "homepage": "https://github.com/prokey-io/eth-prokey-keyring#readme",
+  "dependencies": {
+    "@prokey-io/webcore": "^0.1.10",
+    "hdkey": "0.8.0"
+  }
 }
